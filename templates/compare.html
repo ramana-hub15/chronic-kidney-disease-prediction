@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <h2 class="fw-bold">Model Comparison & Analysis</h2>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary"><i class="fa-solid fa-arrow-left me-2"></i>Back to Dashboard</a>
+</div>
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h5 class="mb-0 fw-bold"><i class="fa-solid fa-chart-bar text-primary me-2"></i>Algorithm Performance Comparison</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="modelBarChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0 fw-bold">Artificial Neural Network (ANN)</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Accuracy
+                        <span class="badge bg-primary rounded-pill">{{ "%.2f"|format(metrics.get('ANN', {}).get('accuracy', 0) * 100) }}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Precision
+                        <span class="badge bg-info rounded-pill">{{ "%.2f"|format(metrics.get('ANN', {}).get('precision', 0) * 100) }}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Recall (Sensitivity)
+                        <span class="badge bg-warning rounded-pill">{{ "%.2f"|format(metrics.get('ANN', {}).get('recall', 0) * 100) }}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        F1-Score
+                        <span class="badge bg-success rounded-pill">{{ "%.2f"|format(metrics.get('ANN', {}).get('f1_score', 0) * 100) }}%</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0 fw-bold">Logistic Regression (LR)</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Accuracy
+                        <span class="badge bg-primary rounded-pill">{{ "%.2f"|format(metrics.get('Logistic Regression', {}).get('accuracy', 0) * 100) }}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Precision
+                        <span class="badge bg-info rounded-pill">{{ "%.2f"|format(metrics.get('Logistic Regression', {}).get('precision', 0) * 100) }}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Recall (Sensitivity)
+                        <span class="badge bg-warning rounded-pill">{{ "%.2f"|format(metrics.get('Logistic Regression', {}).get('recall', 0) * 100) }}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        F1-Score
+                        <span class="badge bg-success rounded-pill">{{ "%.2f"|format(metrics.get('Logistic Regression', {}).get('f1_score', 0) * 100) }}%</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h5 class="mb-0 fw-bold"><i class="fa-solid fa-chart-line text-success me-2"></i>Patient Metrics vs Normal Range (Sample Visual)</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-4">This graph illustrates typical normal ranges (green) against hypothetical patient metrics indicating potential CKD risks.</p>
+                <canvas id="lineGraph" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Data from Python context parsed securely
+    const metricsData = {{ metrics | tojson | safe }};
+    
+    // Safely get values with fallbacks
+    const getMetric = (model, metric) => {
+        return (metricsData[model] && metricsData[model][metric]) ? metricsData[model][metric] * 100 : 0;
+    };
+
+    const ann_acc = getMetric('ANN', 'accuracy');
+    const ann_prec = getMetric('ANN', 'precision');
+    const ann_rec = getMetric('ANN', 'recall');
+    const ann_f1 = getMetric('ANN', 'f1_score');
+    
+    const lr_acc = getMetric('Logistic Regression', 'accuracy');
+    const lr_prec = getMetric('Logistic Regression', 'precision');
+    const lr_rec = getMetric('Logistic Regression', 'recall');
+    const lr_f1 = getMetric('Logistic Regression', 'f1_score');
+
+    // Bar Chart
+    const barCtx = document.getElementById('modelBarChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Accuracy', 'Precision', 'Recall', 'F1-Score'],
+            datasets: [
+                {
+                    label: 'Artificial Neural Network',
+                    data: [ann_acc, ann_prec, ann_rec, ann_f1],
+                    backgroundColor: 'rgba(0, 123, 255, 0.7)',
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                },
+                {
+                    label: 'Logistic Regression',
+                    data: [lr_acc, lr_prec, lr_rec, lr_f1],
+                    backgroundColor: 'rgba(108, 117, 125, 0.7)',
+                    borderColor: 'rgba(108, 117, 125, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: { display: true, text: 'Percentage (%)' }
+                }
+            },
+            plugins: {
+                legend: { position: 'top' }
+            }
+        }
+    });
+
+    // Line Graph (Patient Metrics vs Normal)
+    const lineCtx = document.getElementById('lineGraph').getContext('2d');
+    new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: ['Serum Creatinine', 'Blood Urea', 'Hemoglobin', 'Packed Cell Vol', 'Blood Glucose'],
+            datasets: [
+                {
+                    label: 'Normal Reference Range (Avg)',
+                    data: [0.9, 25, 15, 45, 100], // Example normal values
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: 'Hypothetical CKD Patient',
+                    data: [3.8, 56, 11.2, 32, 117], // From dataset index 3 (CKD patient)
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: { position: 'top' }
+            }
+        }
+    });
+</script>
+{% endblock %}

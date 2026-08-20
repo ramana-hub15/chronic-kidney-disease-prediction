@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-sm border-0 mt-3">
+            <div class="card-header bg-primary text-white d-flex align-items-center">
+                <i class="fa-solid fa-file-medical fa-lg me-3"></i>
+                <h4 class="mb-0 fw-bold">New Patient Medical Record</h4>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted mb-4">Enter the patient's medical parameters below. The Artificial Neural Network will analyze the data to predict Chronic Kidney Disease probability.</p>
+                
+                <form method="POST" action="{{ url_for('predict') }}">
+                    <div class="row g-4">
+                        <!-- Serum Creatinine (sc) -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Serum Creatinine (sc) <small class="text-muted">mgs/dl</small></label>
+                            <input type="number" step="any" class="form-control" name="sc" required placeholder="e.g. 1.2">
+                        </div>
+                        
+                        <!-- Blood Urea (bu) -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Blood Urea (bu) <small class="text-muted">mgs/dl</small></label>
+                            <input type="number" step="any" class="form-control" name="bu" required placeholder="e.g. 36.0">
+                        </div>
+                        
+                        <!-- Hemoglobin (hemo) -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Hemoglobin (hemo) <small class="text-muted">gms</small></label>
+                            <input type="number" step="any" class="form-control" name="hemo" required placeholder="e.g. 15.4">
+                        </div>
+                        
+                        <!-- Packed Cell Volume (pcv) -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Packed Cell Volume (pcv)</label>
+                            <input type="number" step="any" class="form-control" name="pcv" required placeholder="e.g. 44">
+                        </div>
+                        
+                        <!-- Specific Gravity (sg) -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Specific Gravity (sg)</label>
+                            <select class="form-select" name="sg" required>
+                                <option value="" selected disabled>Select value</option>
+                                <option value="1.005">1.005</option>
+                                <option value="1.010">1.010</option>
+                                <option value="1.015">1.015</option>
+                                <option value="1.020">1.020</option>
+                                <option value="1.025">1.025</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Albumin (al) -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Albumin (al)</label>
+                            <select class="form-select" name="al" required>
+                                <option value="" selected disabled>Select value</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Blood Glucose Random (bgr) -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Blood Glucose Random (bgr) <small class="text-muted">mgs/dl</small></label>
+                            <input type="number" step="any" class="form-control" name="bgr" required placeholder="e.g. 121.0">
+                        </div>
+                        
+                        <!-- Hypertension (htn) -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Hypertension (htn)</label>
+                            <select class="form-select" name="htn" required>
+                                <option value="" selected disabled>Select option</option>
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Diabetes Mellitus (dm) -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Diabetes Mellitus (dm)</label>
+                            <select class="form-select" name="dm" required>
+                                <option value="" selected disabled>Select option</option>
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="reset" class="btn btn-light border px-4 me-md-2">Clear Form</button>
+                        <button type="submit" class="btn btn-primary px-5"><i class="fa-solid fa-microscope me-2"></i>Analyze & Predict</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

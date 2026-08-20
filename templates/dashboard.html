@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Hospital Dashboard</h2>
+    <span class="badge bg-primary fs-6"><i class="fa-solid fa-user-doctor me-1"></i> {{ session.get('role') }} Portal</span>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-center h-100">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <div class="metric-title"><i class="fa-solid fa-users text-primary me-2"></i>Total Patients Analyzed</div>
+                <div class="metric-value">{{ total }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <div class="metric-title"><i class="fa-solid fa-triangle-exclamation text-danger me-2"></i>CKD Cases</div>
+                <div class="metric-value text-danger">{{ ckd }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <div class="metric-title"><i class="fa-solid fa-heart-pulse text-success me-2"></i>Non-CKD Cases</div>
+                <div class="metric-value text-success">{{ non_ckd }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fa-solid fa-chart-pie me-2"></i>CKD Distribution</span>
+            </div>
+            <div class="card-body">
+                <canvas id="ckdPieChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fa-solid fa-brain me-2"></i>Model Accuracy Overview</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h5 class="text-primary fw-bold">Artificial Neural Network (Main)</h5>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ "%.1f"|format(metrics.get('ANN', {}).get('accuracy', 0) * 100) }}%;" aria-valuenow="{{ "%.1f"|format(metrics.get('ANN', {}).get('accuracy', 0) * 100) }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ "%.1f"|format(metrics.get('ANN', {}).get('accuracy', 0) * 100) }}%
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h5 class="text-secondary fw-bold">Logistic Regression (Comparison)</h5>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ "%.1f"|format(metrics.get('Logistic Regression', {}).get('accuracy', 0) * 100) }}%;" aria-valuenow="{{ "%.1f"|format(metrics.get('Logistic Regression', {}).get('accuracy', 0) * 100) }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ "%.1f"|format(metrics.get('Logistic Regression', {}).get('accuracy', 0) * 100) }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ctx = document.getElementById('ckdPieChart').getContext('2d');
+    const ckd = {{ ckd }};
+    const nonCkd = {{ non_ckd }};
+    
+    // Fallback if data is 0 for aesthetic purposes while testing
+    const displayCkd = ckd === 0 && nonCkd === 0 ? 1 : ckd;
+    const displayNonCkd = ckd === 0 && nonCkd === 0 ? 1 : nonCkd;
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['CKD Detected', 'Normal (Non-CKD)'],
+            datasets: [{
+                data: [displayCkd, displayNonCkd],
+                backgroundColor: ['#dc3545', '#28a745'],
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: { size: 14, family: "'Inter', sans-serif" }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
